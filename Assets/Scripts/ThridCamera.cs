@@ -13,7 +13,7 @@ public class ThridCamera : MonoBehaviour
     private RaycastHit hit = new RaycastHit();
     private Vector3 preVelocity = Vector3.zero;
     private Vector3 currentVelocity = Vector3.zero;
-    public Camera camera;
+    public new Camera camera;
     Vector3 velocity = Vector3.zero;
     void Start()
     {

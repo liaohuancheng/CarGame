@@ -9,6 +9,6 @@ public class TestUI : MonoBehaviour
     public Text speedUI;
     void Update()
     {
-        speedUI.text = car.GetComponent<Rigidbody>().velocity.ToString();
+        speedUI.text = car.GetComponent<Rigidbody>().velocity.magnitude.ToString();
     }
 }
