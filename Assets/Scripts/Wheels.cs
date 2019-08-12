@@ -12,6 +12,6 @@ public class Wheels : MonoBehaviour
     void Update()
     {
         this.degree = (this.wc.rpm * 360 / 60) * Time.deltaTime;
-        this.transform.rotation = this.wc.transform.rotation * Quaternion.Euler(this.degree, this.wc.steerAngle,0);
+        this.transform.Rotate(degree * Vector3.right);
     }
 }
