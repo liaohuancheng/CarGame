@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class car : MonoBehaviour
+public class Car : MonoBehaviour
 {
     public Transform wheelFR;
     public Transform wheelFL;
@@ -33,7 +33,7 @@ public class car : MonoBehaviour
         initProperty();
     }
 
-    private void initProperty()
+    private void initProperty()//初始化各个物件
     {
         wheelColliderFL = transform.Find("WheelsHubs/WheelHubFrontLeft").GetComponent<WheelCollider>();
         wheelColliderFR = transform.Find("WheelsHubs/WheelHubFrontRight").GetComponent<WheelCollider>();
@@ -49,8 +49,8 @@ public class car : MonoBehaviour
 
     }
 
-    // Update is called once per frame
-    void Update()
+
+    public void Move(float steering, float accel, float footbrake, float handbrake)
     {
         bool isBrake = false;
 
@@ -58,7 +58,7 @@ public class car : MonoBehaviour
         currentSpeed = rigibody.velocity.magnitude;
         //Debug.Log(wheelColliderFL.motorTorque);
         //Debug.Log(currentSpeed);
-        if ((currentSpeed > maxSpeed && Input.GetAxis("Vertical") > 0) || (currentSpeed < -minSpeed && Input.GetAxis("Vertical") < 0))
+        if ((currentSpeed > maxSpeed && accel > 0) || (currentSpeed < -minSpeed && footbrake < 0))
         {
             //Debug.Log("置0");
             wheelColliderFL.motorTorque = 0;
@@ -69,12 +69,12 @@ public class car : MonoBehaviour
         else
         {
 
-            wheelColliderFL.motorTorque = Input.GetAxis("Vertical") * motorTorque;
-            wheelColliderFR.motorTorque = Input.GetAxis("Vertical") * motorTorque;
-            wheelColliderRR.motorTorque = Input.GetAxis("Vertical") * motorTorque;
-            wheelColliderRL.motorTorque = Input.GetAxis("Vertical") * motorTorque;
+            wheelColliderFL.motorTorque = accel * motorTorque;
+            wheelColliderFR.motorTorque = accel * motorTorque;
+            wheelColliderRR.motorTorque = accel * motorTorque;
+            wheelColliderRL.motorTorque = accel * motorTorque;
         }
-        
+
         if (Input.GetKey(KeyCode.Space))
         {
             isBrake = true;
@@ -88,7 +88,7 @@ public class car : MonoBehaviour
 
         if (isBrake)
         {
-            
+
 
             wheelColliderRR.brakeTorque = brakeTorque;
             wheelColliderRL.brakeTorque = brakeTorque;
@@ -98,22 +98,19 @@ public class car : MonoBehaviour
             wheelColliderRR.brakeTorque = 0;
             wheelColliderRL.brakeTorque = 0;
         }
-        wheelColliderFL.steerAngle = Input.GetAxis("Horizontal") * steeringAngle;
-        wheelColliderFR.steerAngle = Input.GetAxis("Horizontal") * steeringAngle;
-        
+        wheelColliderFL.steerAngle = steering * steeringAngle;
+        wheelColliderFR.steerAngle = steering * steeringAngle;
 
-        RotateWheels();
-        SteerWheels();
+
+        RotateWheels();//轮胎旋转
+        SteerWheels();//轮胎偏转
+        AddDownForce();//增加抓地力，方便控制
     }
-
-    private void FixedUpdate()
+    private void AddDownForce()
     {
-        Skid();
-    }
-
-    private void Skid()
-    {
-        
+        //m_WheelColliders[0].attachedRigidbody.AddForce(-transform.up*m_Downforce*
+        //                                                 m_WheelColliders[0].attachedRigidbody.velocity.magnitude);
+        rigibody.AddForce(-transform.up * 100 * wheelColliderFL.attachedRigidbody.velocity.magnitude);
     }
 
     private void SteerWheels()
