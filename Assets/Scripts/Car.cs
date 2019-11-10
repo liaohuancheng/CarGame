@@ -15,6 +15,8 @@ public class Car : MonoBehaviour
     public WheelCollider wheelColliderRR;
     public WheelCollider wheelColliderRL;
 
+    public Rigidbody rigidbody;
+
     public Transform centerOfMass;
 
     public float motorTorque;
@@ -26,11 +28,13 @@ public class Car : MonoBehaviour
 
     public float brakeTorque ;
     private Rigidbody rigibody;
+    public int reverseTorque;
 
     // Start is called before the first frame update
     void Start()
     {
         initProperty();
+        rigidbody = GetComponent<Rigidbody>();
     }
 
     private void initProperty()//初始化各个物件
@@ -58,24 +62,9 @@ public class Car : MonoBehaviour
         currentSpeed = rigibody.velocity.magnitude;
         //Debug.Log(wheelColliderFL.motorTorque);
         //Debug.Log(currentSpeed);
-        if ((currentSpeed > maxSpeed && accel > 0) || (currentSpeed < -minSpeed && footbrake < 0))
-        {
-            //Debug.Log("置0");
-            wheelColliderFL.motorTorque = 0;
-            wheelColliderFR.motorTorque = 0;
-            wheelColliderRL.motorTorque = 0;
-            wheelColliderRR.motorTorque = 0;
-        }
-        else
-        {
+        ApplyDrive(accel, footbrake);
 
-            wheelColliderFL.motorTorque = accel * motorTorque;
-            wheelColliderFR.motorTorque = accel * motorTorque;
-            wheelColliderRR.motorTorque = accel * motorTorque;
-            wheelColliderRL.motorTorque = accel * motorTorque;
-        }
-
-        if (Input.GetKey(KeyCode.Space))
+        if (handbrake>0)
         {
             isBrake = true;
         }
@@ -106,6 +95,47 @@ public class Car : MonoBehaviour
         SteerWheels();//轮胎偏转
         AddDownForce();//增加抓地力，方便控制
     }
+
+    private void ApplyDrive(float accel, float footbrake)
+    {
+        if ((currentSpeed > maxSpeed && accel > 0) || (currentSpeed < -minSpeed && footbrake > 0))
+        {
+            //Debug.Log("置0");
+            wheelColliderFL.motorTorque = 0;
+            wheelColliderFR.motorTorque = 0;
+            wheelColliderRL.motorTorque = 0;
+            wheelColliderRR.motorTorque = 0;
+        }
+        else
+        {
+
+            wheelColliderFL.motorTorque = accel * motorTorque;
+            wheelColliderFR.motorTorque = accel * motorTorque;
+            wheelColliderRR.motorTorque = accel * motorTorque;
+            wheelColliderRL.motorTorque = accel * motorTorque;
+        }
+
+        if(currentSpeed > 5 && Vector3.Angle(transform.forward, rigidbody.velocity) < 50f)
+        {
+            wheelColliderFL.brakeTorque = brakeTorque * footbrake;
+            wheelColliderFR.brakeTorque = brakeTorque * footbrake;
+            wheelColliderRR.brakeTorque = brakeTorque * footbrake;
+            wheelColliderRL.brakeTorque = brakeTorque * footbrake;
+        }else if (footbrake > 0)
+        {
+            wheelColliderFL.brakeTorque = 0f;
+            wheelColliderFR.brakeTorque = 0f;
+            wheelColliderRR.brakeTorque = 0f;
+            wheelColliderRL.brakeTorque = 0f;
+
+            wheelColliderFL.motorTorque = -reverseTorque * footbrake; ;
+            wheelColliderFR.motorTorque = -reverseTorque * footbrake; ;
+            wheelColliderRR.motorTorque = -reverseTorque * footbrake; ;
+            wheelColliderRL.motorTorque = -reverseTorque * footbrake; ;
+        }
+        
+    }
+
     private void AddDownForce()
     {
         //m_WheelColliders[0].attachedRigidbody.AddForce(-transform.up*m_Downforce*
